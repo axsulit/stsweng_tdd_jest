@@ -76,7 +76,28 @@ describe('Post controller', () => {
     });
 
     describe('update', () => {
+        it('should return the updated post object', () => {
+            const postId = 'existingPostId';
+            const updateData = {
+                title: 'Updated Title',
+                content: 'Updated Content'
+            };
+            const updatedPost = {
+                _id: postId,
+                title: updateData.title,
+                content: updateData.content,
+                author: 'existingAuthor',
+                date: Date.now()
+            };
+            const updatePostStub = sinon.stub(PostModel, 'updatePost').yields(null, updatedPost);
 
+            PostController.update(req, res);
+
+            sinon.assert.calledWith(PostModel.updatePost, postId, updateData);
+            sinon.assert.calledWith(res.json, updatedPost);
+
+            updatePostStub.restore();
+        });
     });
 
     describe('findPost', () => {
