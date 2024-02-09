@@ -29,3 +29,12 @@ exports.updatePost = (id, updatedFields, next) => {
     return next(null, post);
   });
 };
+
+exports.findPost = (id, next) => {
+  Post.findById(id, (err, post) => {
+    if (err) {
+      return next(err);
+    }
+    return next(null, post);
+  });
+};

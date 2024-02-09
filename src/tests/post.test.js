@@ -134,8 +134,37 @@ describe("Post controller", () => {
       sinon.assert.calledWith(PostModel.updatePost, postId, updateData);
       sinon.assert.calledWith(res.json, sinon.match(updatedPost));
     });
+
+    it("should return status 500 on server error", () => {
+      //Arrange
+      const postId = "507asdghajsdhjgasd";
+      const updateData = {
+        title: "Updated Title",
+        content: "Updated Content",
+        author: "Updated Author",
+        date: Date.now(),
+      };
+
+      updatePostStub.withArgs(postId, updateData).yields(new Error("Server Error"));
+
+      req = {
+        params: {
+          id: postId,
+        },
+        body: updateData,
+      };
+
+      // Act
+      PostController.update(req, res);
+
+      //Assert
+      sinon.assert.calledWith(PostModel.updatePost, postId, updateData);
+      sinon.assert.calledWith(res.status, 500);
+      sinon.assert.calledOnce(res.status(500).end);
+    });
   });
 
+  /*************************************************************************** */
   describe("find", () => {
     var findPostStub;
 
