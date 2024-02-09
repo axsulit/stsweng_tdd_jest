@@ -136,5 +136,71 @@ describe("Post controller", () => {
     });
   });
 
-  describe("findPost", () => {});
+  describe("find", () => {
+    var findPostStub;
+
+    beforeEach(() => {
+      // before every test case setup first
+      res = {
+        json: sinon.spy(),
+        status: sinon.stub().returns({ end: sinon.spy() }),
+      };
+
+      // stub findPost
+      findPostStub = sinon.stub(PostModel, "findPost");
+    });
+
+    afterEach(() => {
+      // executed after the test case
+      findPostStub.restore();
+    });
+
+    // Scenario
+    it("should return the found post object", () => {
+      // Arrange
+      const postId = "507asdghajsdhjgasd";
+      const postToFind = {
+        _id: postId,
+        title: "My first test post",
+        content: "Random content",
+      };
+
+      findPostStub.withArgs(postId).yields(null, postToFind);
+
+      req = {
+        params: {
+          id: postId,
+        },
+      };
+
+      // Act
+      PostController.findPost(req, res);
+
+      // Assert
+      sinon.assert.calledWith(PostModel.findPost, postId);
+      sinon.assert.calledWith(res.json, sinon.match(postToFind));
+    });
+
+    // Error scenario
+    it("should return status 500 on server error", () => {
+      // Arrange
+      const postId = "507asdghajsdhjgasd";
+
+      findPostStub.withArgs(postId).yields(new Error("Some error occured!"));
+
+      req = {
+        params: {
+          id: postId,
+        },
+      };
+
+      // Act
+      PostController.findPost(req, res);
+
+      // Assert
+      sinon.assert.calledWith(PostModel.findPost, postId);
+      sinon.assert.calledWith(res.status, 500);
+      sinon.assert.calledOnce(res.status(500).end);
+    });
+  });
 });
